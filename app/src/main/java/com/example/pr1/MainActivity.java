@@ -2,6 +2,7 @@ package com.example.pr1;
 
 import android.animation.ObjectAnimator;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.method.HideReturnsTransformationMethod;
@@ -32,6 +33,7 @@ import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 
 import java.io.IOException;
+import java.sql.Blob;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -40,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
 
     public String Login, Password;
     public String Name;
+    public Blob currentImg;
     private RecyclerView recyclerView;
     private ArrayList<MainModel> topicList = new ArrayList<>();
     private MainAdapter adapter;
@@ -52,6 +55,8 @@ public class MainActivity extends AppCompatActivity {
     private ResultsAdapter resultsAdapter;
     private ArrayList<ResultsModel> resultsList = new ArrayList<>();
     private int IdTopic;
+
+    private ImageView imageView;
 
 
     private ImageView[] triangles;
@@ -405,6 +410,7 @@ public class MainActivity extends AppCompatActivity {
                 myMap.put("username", Name);
                 myMap.put("email", Login);
                 myMap.put("password", Password);
+                myMap.put("ico", currentImg);
                 conn.data(myMap);
 
                 response = conn.ignoreContentType(true)

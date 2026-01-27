@@ -1,5 +1,8 @@
 package com.example.pr1.Users;
 
+import android.graphics.drawable.Drawable;
+
+import java.sql.Blob;
 import java.time.LocalDateTime;
 
 public class UsersModel {
@@ -7,6 +10,7 @@ public class UsersModel {
     public String username;
     public String email;
     public String password;
+    public Blob img;
 
 
     public UsersModel(int id, String username, String email) {
