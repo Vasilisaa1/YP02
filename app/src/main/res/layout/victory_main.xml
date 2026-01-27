@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -77,8 +75,24 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
+    <!-- Заголовок страницы -->
+    <TextView
+        android:id="@+id/titleResults"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:text="Мои достижения"
+        android:textColor="@color/white"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:letterSpacing="0.02"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Список карточек с результатами -->
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/listCards"
+        android:id="@+id/listresult"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginStart="16dp"
@@ -89,11 +103,10 @@
         android:paddingBottom="8dp"
         app:layout_constraintBottom_toTopOf="@+id/topMenu"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0" />
+        app:layout_constraintTop_toBottomOf="@+id/titleResults" />
 
+    <!-- Нижнее меню -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/topMenu"
         android:layout_width="0dp"
@@ -120,29 +133,27 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:background="@drawable/menu_item"
+                android:background="?selectableItemBackground"
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center"
+                android:onClick="OnMain"
                 android:orientation="vertical"
                 android:padding="8dp">
 
                 <ImageView
-                    android:id="@+id/ivMain"
                     android:layout_width="28dp"
                     android:layout_height="28dp"
                     android:src="@drawable/glavn"
                     app:tint="@color/white" />
 
                 <TextView
-                    android:id="@+id/tvMain"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
                     android:text="Главная"
                     android:textColor="@android:color/white"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
+                    android:textSize="12sp" />
             </LinearLayout>
 
             <!-- Профиль -->
@@ -160,14 +171,12 @@
                 android:padding="8dp">
 
                 <ImageView
-                    android:id="@+id/ivProfile"
                     android:layout_width="28dp"
                     android:layout_height="28dp"
                     android:src="@drawable/userr"
                     app:tint="@color/white" />
 
                 <TextView
-                    android:id="@+id/tvProfile"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
@@ -182,37 +191,34 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:background="?selectableItemBackground"
+
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center"
-                android:onClick="OnResult"
                 android:orientation="vertical"
                 android:padding="8dp">
 
                 <ImageView
-                    android:id="@+id/ivResults"
                     android:layout_width="28dp"
                     android:layout_height="28dp"
                     android:src="@drawable/result"
                     app:tint="@color/white" />
 
                 <TextView
-                    android:id="@+id/tvResults"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
                     android:text="Результат"
                     android:textColor="@android:color/white"
-                    android:textSize="12sp" />
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
             </LinearLayout>
-
             <LinearLayout
                 android:id="@+id/tabVictory"
                 android:layout_width="0dp"
+                android:background="@drawable/menu_item"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:background="?selectableItemBackground"
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center"
