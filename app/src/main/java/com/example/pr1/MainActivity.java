@@ -2,6 +2,8 @@ package com.example.pr1;
 
 import android.animation.ObjectAnimator;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.method.HideReturnsTransformationMethod;
@@ -488,10 +490,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     class LoadProfileData extends AsyncTask<Void, Void, UsersModel> {
+        private Bitmap userImage = null;
+
         @Override
         protected UsersModel doInBackground(Void... voids) {
             try {
                 Log.d("Profile", "Attempting to load profile with token: " + (authToken.isEmpty() ? "empty" : "present"));
+
+                // Загружаем данные пользователя
                 Connection.Response response = Jsoup.connect("http://10.0.2.2:5184/api/Users/GetCurrentUser")
                         .header("Authorization", "Bearer " + authToken)
                         .ignoreContentType(true)
@@ -505,11 +511,34 @@ public class MainActivity extends AppCompatActivity {
                     Log.d("Profile", "Response body: " + jsonResponse);
                     JSONObject userJson = new JSONObject(jsonResponse);
 
-                    return new UsersModel(
+                    // Создаем объект пользователя
+                    UsersModel user = new UsersModel(
                             userJson.getInt("id"),
                             userJson.getString("username"),
                             userJson.getString("email")
                     );
+
+                    // Проверяем и загружаем изображение, если оно есть
+                    if (userJson.has("img") && !userJson.isNull("img")) {
+                        String imageBase64 = userJson.getString("img");
+
+                        // Если изображение в формате Base64
+                        if (imageBase64 != null && !imageBase64.isEmpty()) {
+                            try {
+                                byte[] imageBytes = android.util.Base64.decode(imageBase64, android.util.Base64.DEFAULT);
+                                userImage = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+                            } catch (Exception e) {
+                                Log.e("Profile", "Error decoding base64 image: " + e.getMessage());
+                            }
+                        }
+                    }
+                    // Альтернативно, если изображение передается как URL
+                    else if (userJson.has("imageUrl") && !userJson.isNull("imageUrl")) {
+                        String imageUrl = userJson.getString("imageUrl");
+                        userImage = loadImageFromUrl(imageUrl);
+                    }
+
+                    return user;
                 } else {
                     Log.d("Profile", "Failed to get current user, status: " + response.statusCode());
                     if (currentUserId != 0) {
@@ -529,9 +558,34 @@ public class MainActivity extends AppCompatActivity {
             return null;
         }
 
+        // Метод для загрузки изображения по URL (если API возвращает URL)
+        private Bitmap loadImageFromUrl(String imageUrl) {
+            try {
+                // Если URL начинается с /, добавляем базовый адрес сервера
+                if (imageUrl.startsWith("/")) {
+                    imageUrl = "http://10.0.2.2:5184" + imageUrl;
+                }
+
+                Log.d("ImageLoad", "Loading image from: " + imageUrl);
+
+                Connection.Response imgResponse = Jsoup.connect(imageUrl)
+                        .ignoreContentType(true)
+                        .timeout(10000)
+                        .execute();
+
+                byte[] imgBytes = imgResponse.bodyAsBytes();
+                return BitmapFactory.decodeByteArray(imgBytes, 0, imgBytes.length);
+            } catch (IOException e) {
+                Log.e("Profile", "Error loading image from URL: " + e.getMessage());
+                return null;
+            }
+        }
+
+        // Метод для получения пользователя по ID
         private UsersModel getUserById(int userId) {
             try {
                 Connection.Response response = Jsoup.connect("http://10.0.2.2:5184/api/Users/" + userId)
+                        .header("Authorization", "Bearer " + authToken)
                         .ignoreContentType(true)
                         .method(Connection.Method.GET)
                         .execute();
@@ -555,7 +609,7 @@ public class MainActivity extends AppCompatActivity {
         protected void onPostExecute(UsersModel user) {
             super.onPostExecute(user);
             if (user != null) {
-                updateProfileUI(user);
+                updateProfileUI(user, userImage);
                 Toast.makeText(MainActivity.this, "Данные профиля загружены", Toast.LENGTH_SHORT).show();
             } else {
                 showDemoProfile();
@@ -563,9 +617,9 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
-
     class GetUser extends AsyncTask<Void, Void, Void> {
         Connection.Response response;
+        private Bitmap userImage = null;
 
         @Override
         protected Void doInBackground(Void... voids) {
@@ -589,6 +643,19 @@ public class MainActivity extends AppCompatActivity {
                     currentUserName = Login;
                     currenUserEmail = Login;
                     Log.d("GetUser", "User ID set to: " + currentUserId);
+
+                    // Попробуем получить изображение пользователя
+                    if (jsonObject.has("img") && !jsonObject.isNull("img")) {
+                        String imageBase64 = jsonObject.getString("img");
+                        if (imageBase64 != null && !imageBase64.isEmpty()) {
+                            try {
+                                byte[] imageBytes = android.util.Base64.decode(imageBase64, android.util.Base64.DEFAULT);
+                                userImage = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+                            } catch (Exception e) {
+                                Log.e("GetUser", "Error decoding user image: " + e.getMessage());
+                            }
+                        }
+                    }
                 }
 
             } catch (IOException | JSONException e) {
@@ -612,32 +679,97 @@ public class MainActivity extends AppCompatActivity {
                     initializeTopics();
                     new GetTopic().execute();
 
+                    // Сохраняем изображение в глобальную переменную если нужно
+                    if (userImage != null) {
+                        // Можно сохранить bitmap для дальнейшего использования
+                    }
                 });
             }
         }
     }
 
 
-    private void updateProfileUI(UsersModel user) {
+    private void updateProfileUI(UsersModel user, Bitmap userImage) {
         TextView profileName = findViewById(R.id.profile_name);
         TextView profileEmail = findViewById(R.id.profile_email);
         TextView profileId = findViewById(R.id.profile_id);
 
+        // Используем локальную переменную вместо глобальной
+        ImageView localImageView = findViewById(R.id.imageView);
+
         if (profileName != null) profileName.setText(user.username);
         if (profileEmail != null) profileEmail.setText(user.email);
         if (profileId != null) profileId.setText("ID: " + user.id);
+
+        // Устанавливаем изображение
+        if (localImageView != null) {
+            if (userImage != null) {
+                localImageView.setImageBitmap(userImage);
+            } else {
+                // Устанавливаем изображение по умолчанию
+                localImageView.setImageResource(R.drawable.er);
+            }
+        }
 
         currentUserId = user.id;
         currentUserName = user.username;
         currenUserEmail = user.email;
     }
 
+    private void loadUserImage(int userId) {
+        // Получаем ImageView из layout
+        final ImageView userImageView = findViewById(R.id.imageView);
+
+        if (userImageView == null) {
+            Log.e("ImageLoad", "ImageView not found!");
+            return;
+        }
+
+        new AsyncTask<Integer, Void, Bitmap>() {
+            @Override
+            protected Bitmap doInBackground(Integer... params) {
+                int userId = params[0];
+                try {
+                    // Предполагаем, что API имеет endpoint для получения изображения пользователя
+                    Connection.Response response = Jsoup.connect("http://10.0.2.2:5184/api/Users/" + userId + "/Image")
+                            .ignoreContentType(true)
+                            .method(Connection.Method.GET)
+                            .execute();
+
+                    if (response.statusCode() == 200) {
+                        byte[] imageBytes = response.bodyAsBytes();
+                        return BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+                    }
+                } catch (IOException e) {
+                    Log.e("ImageLoad", "Error loading user image: " + e.getMessage());
+                }
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Bitmap bitmap) {
+                if (bitmap != null && userImageView != null) {
+                    userImageView.setImageBitmap(bitmap);
+                } else if (userImageView != null) {
+                    // Устанавливаем изображение по умолчанию
+                    userImageView.setImageResource(R.drawable.er);
+                }
+            }
+        }.execute(userId);
+    }
+
     private void showDemoProfile() {
         TextView profileName = findViewById(R.id.profile_name);
         TextView profileEmail = findViewById(R.id.profile_email);
+        ImageView imageView = findViewById(R.id.imageView);
 
         if (profileName != null) profileName.setText("Демо пользователь");
         if (profileEmail != null) profileEmail.setText("demo@example.com");
+
+        // Устанавливаем изображение по умолчанию
+        if (imageView != null) {
+            imageView.setImageResource(R.drawable.er);
+        }
 
         Toast.makeText(this, "Загружены демо-данные", Toast.LENGTH_SHORT).show();
     }
