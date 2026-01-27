@@ -282,6 +282,7 @@
                     android:src="@drawable/result"
                     app:tint="@color/white" />
 
+
                 <TextView
                     android:id="@+id/tvResults"
                     android:layout_width="wrap_content"
