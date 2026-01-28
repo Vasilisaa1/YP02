@@ -291,6 +291,12 @@ public class MainActivity extends AppCompatActivity {
         new LoadProfileData().execute();
     }
 
+    public void OnVictory(View view) {
+        setContentView(R.layout.victory_main);
+        stopTriangleAnimations();
+        new LoadProfileData().execute();
+    }
+
     public void Back(View view) {
         stopTriangleAnimations();
         finishAffinity();
