@@ -216,7 +216,11 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center"
+<<<<<<< HEAD
                 android:onClick="OnResult"
+=======
+                android:onClick="OnVictory"
+>>>>>>> af5ed450cd5dc65fc831ce09e7f7f6fc908c5269
                 android:orientation="vertical"
                 android:padding="8dp">
 

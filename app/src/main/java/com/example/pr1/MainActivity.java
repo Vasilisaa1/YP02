@@ -269,7 +269,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.auth);
         setupPasswordToggle();
     }
-
     public void OnProfil(View view) {
         setContentView(R.layout.profile_activity);
         stopTriangleAnimations();
@@ -494,7 +493,6 @@ public class MainActivity extends AppCompatActivity {
             } catch (IOException | JSONException e) {
                 e.printStackTrace();
             }
-
             return null;
         }
 
@@ -510,7 +508,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
-
     class GetUser extends AsyncTask<Void, Void, Void> {
         Connection.Response response;
         private Bitmap userImage = null;

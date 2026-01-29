@@ -15,8 +15,12 @@
         android:layout_height="60dp"
         android:layout_gravity="center_vertical"
         android:layout_marginEnd="16dp"
+<<<<<<< HEAD
 
 
+=======
+        android:src="@drawable/er"
+>>>>>>> af5ed450cd5dc65fc831ce09e7f7f6fc908c5269
         />
 
     <LinearLayout

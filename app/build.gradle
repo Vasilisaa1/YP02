@@ -33,8 +33,11 @@ dependencies {
     implementation 'org.jsoup:jsoup:1.13.1'
     implementation 'com.google.code.gson:gson:2.8.5'
 
+<<<<<<< HEAD
     implementation 'com.github.bumptech.glide:glide:4.12.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.12.0'
+=======
+>>>>>>> af5ed450cd5dc65fc831ce09e7f7f6fc908c5269
 
     implementation 'com.squareup.okhttp3:okhttp:4.9.3'
     implementation 'org.json:json:20210307'

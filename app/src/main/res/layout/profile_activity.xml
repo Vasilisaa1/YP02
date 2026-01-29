@@ -292,7 +292,39 @@
                     android:textColor="@android:color/white"
                     android:textSize="12sp" />
             </LinearLayout>
+<<<<<<< HEAD
 
+=======
+            <LinearLayout
+                android:id="@+id/tabVictory"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="?selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center"
+                android:onClick="OnVictory"
+                android:orientation="vertical"
+                android:padding="8dp">
+
+                <ImageView
+                    android:id="@+id/ivVictory"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:src="@drawable/ic_victory"
+                    app:tint="@color/white" />
+
+                <TextView
+                    android:id="@+id/tvVictory"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Достижения"
+                    android:textColor="@android:color/white"
+                    android:textSize="12sp" />
+            </LinearLayout>
+>>>>>>> af5ed450cd5dc65fc831ce09e7f7f6fc908c5269
         </LinearLayout>
 
     </com.google.android.material.card.MaterialCardView>

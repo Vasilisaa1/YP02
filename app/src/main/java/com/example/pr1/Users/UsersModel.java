@@ -10,6 +10,7 @@ public class UsersModel {
     public String username;
     public String email;
     public String password;
+<<<<<<< HEAD
     public  String ProfileIconFileName;
 
 
@@ -18,6 +19,15 @@ public class UsersModel {
         this.username = username;
         this.email = email;
         this.ProfileIconFileName = ProfileIconFileName;
+=======
+    public Blob img;
+
+
+    public UsersModel(int id, String username, String email) {
+        this.id = id;
+        this.username = username;
+        this.email = email;
+>>>>>>> af5ed450cd5dc65fc831ce09e7f7f6fc908c5269
     }
 
     public void setId(int Id) {this.id = Id;}
