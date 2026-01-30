@@ -592,13 +592,5 @@ public class MainActivity extends AppCompatActivity {
 
         Toast.makeText(this, "Загружены демо-данные", Toast.LENGTH_SHORT).show();
     }
-    public void test(View viiew){
-        setContentView(R.layout.testik);
-        ImageView imageView = findViewById(R.id.tessst);
-        String imageUrl = "http://10.0.2.2:5184/img/" + ss.ProfileIconFileName;
-        Picasso
-                .with(this)
-                .load(imageUrl)
-                .into(imageView);
-    }
+
 }
