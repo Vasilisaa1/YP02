@@ -28,8 +28,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <!-- RecyclerView с темами -->
-
     <ImageView
         android:layout_width="80dp"
         android:layout_height="80dp"
@@ -111,12 +109,12 @@
 
             <!-- Аватар -->
             <ImageView
-                android:id="@+id/profile_avatar"
+                android:id="@+id/testImage"
                 android:layout_width="80dp"
                 android:layout_height="80dp"
                 android:layout_marginEnd="20dp"
-                android:src="@drawable/er"
-                app:tint="@color/white" />
+                android:src="@drawable/glavn"
+                />
 
             <!-- Информация профиля -->
             <LinearLayout
@@ -292,9 +290,6 @@
                     android:textColor="@android:color/white"
                     android:textSize="12sp" />
             </LinearLayout>
-<<<<<<< HEAD
-
-=======
             <LinearLayout
                 android:id="@+id/tabVictory"
                 android:layout_width="0dp"
@@ -324,7 +319,6 @@
                     android:textColor="@android:color/white"
                     android:textSize="12sp" />
             </LinearLayout>
->>>>>>> af5ed450cd5dc65fc831ce09e7f7f6fc908c5269
         </LinearLayout>
 
     </com.google.android.material.card.MaterialCardView>

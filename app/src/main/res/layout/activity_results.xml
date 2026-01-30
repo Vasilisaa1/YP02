@@ -215,9 +215,6 @@
                     android:textSize="12sp"
                     android:textStyle="bold" />
             </LinearLayout>
-<<<<<<< HEAD
-
-=======
             <LinearLayout
                 android:id="@+id/tabVictory"
                 android:layout_width="0dp"
@@ -247,7 +244,6 @@
                     android:textColor="@android:color/white"
                     android:textSize="12sp" />
             </LinearLayout>
->>>>>>> af5ed450cd5dc65fc831ce09e7f7f6fc908c5269
         </LinearLayout>
 
     </com.google.android.material.card.MaterialCardView>

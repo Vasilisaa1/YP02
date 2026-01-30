@@ -18,7 +18,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
 import com.example.pr1.Main.MainAdapter;
 import com.example.pr1.Main.MainModel;
 import com.example.pr1.Result.ResultsAdapter;
@@ -26,6 +25,7 @@ import com.example.pr1.Result.ResultsModel;
 import com.example.pr1.Users.UsersModel;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -36,7 +36,6 @@ import org.jsoup.Jsoup;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
@@ -500,7 +499,7 @@ public class MainActivity extends AppCompatActivity {
         protected void onPostExecute(UsersModel user) {
             super.onPostExecute(user);
             if (user != null) {
-                updateProfileUI(user, userImage);
+                updateProfileUI(user);
                 Toast.makeText(MainActivity.this, "Данные профиля загружены", Toast.LENGTH_SHORT).show();
             } else {
                 showDemoProfile();
@@ -533,10 +532,6 @@ public class MainActivity extends AppCompatActivity {
 
                     currentUserName = Login;
                     currenUserEmail = Login;
-
-                    if (currentUserId != 0) {
-                        userImage = loadUserIcon(currentUserId);
-                    }
                 }
 
             } catch (IOException | JSONException e) {
@@ -563,47 +558,20 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
-
-    private Bitmap loadUserIcon(int userId) {
-        try {
-            String url = "http://10.0.2.2:5184/api/Users/ProfileIcon/" + userId;
-
-            Connection.Response response = Jsoup.connect(url)
-                    .ignoreContentType(true)
-                    .execute();
-
-            if (response.statusCode() == 200) {
-                byte[] imageBytes = response.bodyAsBytes();
-                return BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    private void updateProfileUI(UsersModel user, Bitmap userImage) {
+    private void updateProfileUI(UsersModel user) {
         TextView profileName = findViewById(R.id.profile_name);
         TextView profileEmail = findViewById(R.id.profile_email);
         TextView profileId = findViewById(R.id.profile_id);
-        ImageView profileImageView = findViewById(R.id.profile_avatar);
+        ImageView profileImageView = findViewById(R.id.testImage);
 
         String imageUrl = "http://10.0.2.2:5184/img/" + ss.ProfileIconFileName;
-
         if (profileName != null) profileName.setText(user.username);
         if (profileEmail != null) profileEmail.setText(user.email);
         if (profileId != null) profileId.setText("ID: " + user.id);
-
-        if (profileImageView != null) {
-            if (ss.ProfileIconFileName != null) {
-                Glide.with(this)
-                        .load(imageUrl)
-                        .placeholder(R.drawable.er) // Показываем заглушку при ошибке
-                        .into(profileImageView);
-            } else {
-                profileImageView.setImageResource(R.drawable.er);
-            }
-        }
+        Picasso
+                .with(this)
+                .load(imageUrl)
+                .into(profileImageView);
 
         currentUserId = user.id;
         currentUserName = user.username;
@@ -623,5 +591,14 @@ public class MainActivity extends AppCompatActivity {
         }
 
         Toast.makeText(this, "Загружены демо-данные", Toast.LENGTH_SHORT).show();
+    }
+    public void test(View viiew){
+        setContentView(R.layout.testik);
+        ImageView imageView = findViewById(R.id.tessst);
+        String imageUrl = "http://10.0.2.2:5184/img/" + ss.ProfileIconFileName;
+        Picasso
+                .with(this)
+                .load(imageUrl)
+                .into(imageView);
     }
 }
