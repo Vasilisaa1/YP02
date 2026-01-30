@@ -143,12 +143,14 @@
                 android:padding="8dp">
 
                 <ImageView
+                    android:id="@+id/ivMain"
                     android:layout_width="28dp"
                     android:layout_height="28dp"
                     android:src="@drawable/glavn"
                     app:tint="@color/white" />
 
                 <TextView
+                    android:id="@+id/tvMain"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
@@ -163,7 +165,7 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:background="?selectableItemBackground"
+                android:background="@drawable/menu_item"
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center"
@@ -172,18 +174,21 @@
                 android:padding="8dp">
 
                 <ImageView
+                    android:id="@+id/ivProfile"
                     android:layout_width="28dp"
                     android:layout_height="28dp"
                     android:src="@drawable/userr"
                     app:tint="@color/white" />
 
                 <TextView
+                    android:id="@+id/tvProfile"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
                     android:text="Профиль"
                     android:textColor="@android:color/white"
-                    android:textSize="12sp" />
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
             </LinearLayout>
 
             <!-- Результаты -->
@@ -192,36 +197,42 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
+                android:background="?selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center"
                 android:onClick="OnResult"
                 android:orientation="vertical"
                 android:padding="8dp">
 
                 <ImageView
+                    android:id="@+id/ivResults"
                     android:layout_width="28dp"
                     android:layout_height="28dp"
                     android:src="@drawable/result"
                     app:tint="@color/white" />
 
+
                 <TextView
+                    android:id="@+id/tvResults"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
                     android:text="Результат"
                     android:textColor="@android:color/white"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
+                    android:textSize="12sp" />
             </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/tabVictory"
                 android:layout_width="0dp"
-                android:background="@drawable/menu_item"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
+                android:background="?selectableItemBackground"
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center"
-                android:onClick="OnResult"
+                android:onClick="onAchivment"
                 android:orientation="vertical"
                 android:padding="8dp">
 
@@ -241,7 +252,6 @@
                     android:textColor="@android:color/white"
                     android:textSize="12sp" />
             </LinearLayout>
-
         </LinearLayout>
 
     </com.google.android.material.card.MaterialCardView>

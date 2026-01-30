@@ -216,7 +216,7 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center"
-                android:onClick="OnVictory"
+                android:onClick="onAchivment"
                 android:orientation="vertical"
                 android:padding="8dp">
 

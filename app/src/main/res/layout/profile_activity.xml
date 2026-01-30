@@ -18,6 +18,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
     <ImageView
         android:layout_width="80dp"
         android:layout_height="80dp"
@@ -92,10 +93,10 @@
         android:layout_marginTop="32dp"
         android:layout_marginEnd="24dp"
         app:cardBackgroundColor="#1A1A4D"
-        app:cardCornerRadius="20dp"
-        app:cardElevation="8dp"
-        app:strokeColor="#4A4A8C"
-        app:strokeWidth="1dp"
+        app:cardCornerRadius="28dp"
+        app:cardElevation="16dp"
+        app:strokeColor="#5A5AFF"
+        app:strokeWidth="2dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -104,17 +105,48 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:padding="24dp"
+            android:padding="28dp"
             android:gravity="center_vertical">
 
-            <!-- Аватар -->
-            <ImageView
-                android:id="@+id/testImage"
-                android:layout_width="80dp"
-                android:layout_height="80dp"
-                android:layout_marginEnd="20dp"
-                android:src="@drawable/glavn"
-                />
+            <!-- Квадратная аватарка с красивым оформлением -->
+            <FrameLayout
+                android:layout_width="110dp"
+                android:layout_height="110dp"
+                android:layout_marginEnd="28dp">
+
+                <!-- Фоновое свечение -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/avatar_glow"
+                    android:alpha="0.7" />
+
+                <!-- Основная карточка аватарки -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    app:cardCornerRadius="20dp"
+                    app:cardElevation="8dp"
+                    app:strokeColor="#5A5AFF"
+                    app:strokeWidth="2dp">
+
+                    <ImageView
+                        android:id="@+id/testImage"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/glavn" />
+
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Декоративный уголок -->
+                <View
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="bottom|end"
+                    android:background="@drawable/decorative_corner" />
+
+            </FrameLayout>
 
             <!-- Информация профиля -->
             <LinearLayout
@@ -129,10 +161,12 @@
                     android:layout_height="wrap_content"
                     android:text="Загрузка..."
                     android:textColor="@color/white"
-                    android:textSize="20sp"
+                    android:textSize="24sp"
                     android:textStyle="bold"
                     android:letterSpacing="0.02"
-                    android:layout_marginBottom="8dp" />
+                    android:layout_marginBottom="12dp"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
 
                 <TextView
                     android:id="@+id/profile_email"
@@ -140,8 +174,10 @@
                     android:layout_height="wrap_content"
                     android:text="Загрузка..."
                     android:textColor="#A0A0FF"
-                    android:textSize="14sp"
-                    android:layout_marginBottom="4dp" />
+                    android:textSize="15sp"
+                    android:layout_marginBottom="8dp"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
 
                 <TextView
                     android:id="@+id/profile_id"
@@ -149,7 +185,12 @@
                     android:layout_height="wrap_content"
                     android:text="ID: --"
                     android:textColor="#A0A0FF"
-                    android:textSize="12sp" />
+                    android:textSize="13sp"
+                    android:background="#2A2A6D"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="6dp"
+                    android:letterSpacing="0.05"
+                    android:textStyle="bold" />
 
             </LinearLayout>
 
@@ -161,16 +202,18 @@
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/btnLogout"
         android:layout_width="0dp"
-        android:layout_height="60dp"
+        android:layout_height="65dp"
         android:layout_marginStart="24dp"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="28dp"
         android:layout_marginEnd="24dp"
         android:background="@drawable/button_red_background"
         android:onClick="Back"
-        android:text="Выход"
+        android:text="ВЫХОД"
         android:textColor="@color/white"
         android:textSize="18sp"
         android:textStyle="bold"
+        android:letterSpacing="0.05"
+        android:padding="0dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/profile_card" />
@@ -290,6 +333,7 @@
                     android:textColor="@android:color/white"
                     android:textSize="12sp" />
             </LinearLayout>
+
             <LinearLayout
                 android:id="@+id/tabVictory"
                 android:layout_width="0dp"
@@ -299,7 +343,7 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center"
-                android:onClick="OnVictory"
+                android:onClick="onAchivment"
                 android:orientation="vertical"
                 android:padding="8dp">
 

@@ -59,6 +59,8 @@ public class MainActivity extends AppCompatActivity {
     public UsersModel ss;
     private boolean animationsStarted = false;
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -228,8 +230,8 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "Заполните все поля", Toast.LENGTH_SHORT).show();
             return;
         }
-
         new GetUser().execute();
+
     }
 
     public void onRegistration(View view) {
@@ -464,7 +466,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     class LoadProfileData extends AsyncTask<Void, Void, UsersModel> {
-        private Bitmap userImage = null;
 
         @Override
         protected UsersModel doInBackground(Void... voids) {
@@ -509,7 +510,6 @@ public class MainActivity extends AppCompatActivity {
     }
     class GetUser extends AsyncTask<Void, Void, Void> {
         Connection.Response response;
-        private Bitmap userImage = null;
 
         @Override
         protected Void doInBackground(Void... voids) {
@@ -591,6 +591,10 @@ public class MainActivity extends AppCompatActivity {
         }
 
         Toast.makeText(this, "Загружены демо-данные", Toast.LENGTH_SHORT).show();
+    }
+
+    public void onAchivment (View view){
+        setContentView(R.layout.victory_main);
     }
 
 }
