@@ -510,8 +510,6 @@ public class MainActivity extends AppCompatActivity {
     }
     class GetUser extends AsyncTask<Void, Void, Void> {
         Connection.Response response;
-        private Bitmap userImage = null;
-
         @Override
         protected Void doInBackground(Void... voids) {
             try {
