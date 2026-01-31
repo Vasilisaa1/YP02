@@ -2,8 +2,10 @@ package com.example.pr1;
 
 import android.animation.ObjectAnimator;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -258,7 +260,6 @@ public class TestActivity extends AppCompatActivity {
             return;
         }
 
-
         System.out.println("=== DEBUG: Checking user answers ===");
         for (int i = 0; i < quizList.size(); i++) {
             QuizModel quiz = quizList.get(i);
@@ -268,11 +269,68 @@ public class TestActivity extends AppCompatActivity {
 
         int score = quizAdapter.calculateScore();
         int totalQuestions = quizList.size();
-
-        showTestResult(score, totalQuestions);
-
         SaveResultTask saveResultTask = new SaveResultTask();
         saveResultTask.execute(score, totalQuestions);
+        showTestResultAndTriggerAchievements(score, totalQuestions);
+    }
+
+    private void showTestResultAndTriggerAchievements(int score, int totalQuestions) {
+        double percentage = (double) score / totalQuestions * 100;
+        String message = String.format("Результат: %d/%d (%.1f%%)", score, totalQuestions, percentage);
+        int statusColor;
+        String statusText;
+        if (score >= totalQuestions * 0.7) {
+            statusColor = getResources().getColor(R.color.green);
+            statusText = "Отлично!";
+        } else if (score >= totalQuestions * 0.5) {
+            statusColor = getResources().getColor(R.color.cyan);
+            statusText = "Удовлетворительно";
+        } else {
+            statusColor = getResources().getColor(R.color.red);
+            statusText = "Неудовлетворительно";
+        }
+
+        StringBuilder details = new StringBuilder();
+        details.append(message).append("\n");
+        details.append("Статус: ").append(statusText).append("\n\n");
+
+        Map<Integer, String> userAnswers = quizAdapter.getUserAnswers();
+
+        for (int i = 0; i < quizList.size(); i++) {
+            QuizModel quiz = quizList.get(i);
+            String userAnswer = userAnswers.get(quiz.id);
+            boolean isCorrect = userAnswer != null && userAnswer.equals(quiz.correct_answer);
+            String status = isCorrect ? "✓ Верно" : "✗ Неверно";
+
+            details.append("Вопрос ").append(i + 1).append(": ").append(status).append("\n");
+            if (!isCorrect) {
+                details.append("Ваш ответ: ").append(userAnswer != null ? userAnswer : "Нет ответа").append("\n");
+                details.append("Правильный ответ: ").append(quiz.correct_answer).append("\n");
+            }
+            details.append("\n");
+        }
+
+        new android.app.AlertDialog.Builder(this)
+                .setTitle("Результат теста")
+                .setMessage(details.toString())
+                .setPositiveButton("OK", (dialog, which) -> {
+                    saveCheckAchievementsFlag();
+                    Intent intent = new Intent(TestActivity.this, MainActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    intent.putExtra("CHECK_ACHIEVEMENTS", true);
+                    startActivity(intent);
+                    finish();
+                })
+                .setCancelable(false)
+                .show();
+    }
+
+    private void triggerAchievementsCheck() {
+        saveCheckAchievementsFlag();
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        intent.putExtra("CHECK_ACHIEVEMENTS", true);
+        startActivity(intent);
     }
 
     private void showTestResult(int score, int totalQuestions) {
@@ -316,13 +374,24 @@ public class TestActivity extends AppCompatActivity {
                 .setPositiveButton("OK", (dialog, which) -> {
                     Intent intent = new Intent(TestActivity.this, MainActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+
+
                     startActivity(intent);
                     finish();
                 })
                 .setCancelable(false)
                 .show();
-    }
 
+
+    }
+    private void saveCheckAchievementsFlag() {
+        SharedPreferences prefs = getSharedPreferences("TestPrefs", MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putBoolean("check_achievements_after_test", true);
+        editor.putLong("last_test_time", System.currentTimeMillis());
+        editor.apply();
+        Log.d("TestActivity", "Saved check_achievements_after_test flag");
+    }
     class SaveResultTask extends AsyncTask<Integer, Void, Boolean> {
         Connection.Response response;
         String errorMessage = "";
@@ -337,7 +406,6 @@ public class TestActivity extends AppCompatActivity {
                 System.out.println("🔧 Saving result - User: " + currentUserId + ", Topic: " + topicId +
                         ", Score: " + score + ", Total Questions: " + totalQuestions);
 
-                // ОТПРАВЛЯЕМ total_questions НА СЕРВЕР
                 response = Jsoup.connect("http://10.0.2.2:5184/api/UserProgress/Add")
                         .ignoreContentType(true)
                         .method(Connection.Method.POST)
@@ -367,9 +435,9 @@ public class TestActivity extends AppCompatActivity {
             super.onPostExecute(success);
             if (success) {
                 Toast.makeText(TestActivity.this, "Результат сохранен", Toast.LENGTH_SHORT).show();
-
-                // Сохраняем информацию о количестве вопросов локально (на всякий случай)
                 saveQuestionCountLocally(topicId, totalQuestions);
+
+
             } else {
                 String message = "Ошибка сохранения результата";
                 if (response != null) {
@@ -386,6 +454,7 @@ public class TestActivity extends AppCompatActivity {
                 Toast.makeText(TestActivity.this, message, Toast.LENGTH_LONG).show();
             }
         }
+
 
         private void saveQuestionCountLocally(int topicId, int questionCount) {
             android.content.SharedPreferences prefs = getSharedPreferences("QuestionCounts", MODE_PRIVATE);

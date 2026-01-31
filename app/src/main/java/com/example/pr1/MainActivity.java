@@ -2,22 +2,28 @@ package com.example.pr1;
 
 import android.animation.ObjectAnimator;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.method.HideReturnsTransformationMethod;
 import android.text.method.PasswordTransformationMethod;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.pr1.Achivment.Achievement;
+import com.example.pr1.Achivment.AchievementAdapter;
+import com.example.pr1.Achivment.AchievementResponse;
 import com.example.pr1.Main.MainAdapter;
 import com.example.pr1.Main.MainModel;
 import com.example.pr1.Result.ResultsAdapter;
@@ -25,6 +31,7 @@ import com.example.pr1.Result.ResultsModel;
 import com.example.pr1.Users.UsersModel;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.gson.Gson;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
@@ -34,9 +41,13 @@ import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -45,7 +56,8 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private ArrayList<MainModel> topicList = new ArrayList<>();
     private MainAdapter adapter;
-
+    private RecyclerView achievementsRecyclerView;
+    private AchievementAdapter achievementAdapter;
     private int currentUserId = 0;
     private String currentUserName = "";
     private String currenUserEmail = "";
@@ -58,7 +70,10 @@ public class MainActivity extends AppCompatActivity {
     private ImageView[] triangles;
     public UsersModel ss;
     private boolean animationsStarted = false;
+    private Set<Integer> shownAchievements = new HashSet<>();
 
+    private static final String PREFS_NAME = "AchievementsPrefs";
+    private static final String SHOWN_ACHIEVEMENTS_KEY = "shown_achievements";
 
 
     @Override
@@ -66,6 +81,109 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.auth);
         setupPasswordToggle();
+
+        loadShownAchievements();
+    }
+    private void loadShownAchievements() {
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        String json = prefs.getString(SHOWN_ACHIEVEMENTS_KEY, "[]");
+
+        try {
+            JSONArray jsonArray = new JSONArray(json);
+            for (int i = 0; i < jsonArray.length(); i++) {
+                shownAchievements.add(jsonArray.getInt(i));
+            }
+            Log.d("Achievements", "Loaded shown achievements: " + shownAchievements.size());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+    private void saveShownAchievements() {
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+
+        JSONArray jsonArray = new JSONArray();
+        for (Integer id : shownAchievements) {
+            jsonArray.put(id);
+        }
+
+        editor.putString(SHOWN_ACHIEVEMENTS_KEY, jsonArray.toString());
+        editor.apply();
+        Log.d("Achievements", "Saved shown achievements: " + shownAchievements.size());
+    }
+    private void checkAndShowNewAchievementsSimple(ArrayList<Achievement> achievements) {
+        if (achievements == null || achievements.isEmpty()) return;
+
+        Set<Integer> previousShownAchievements = new HashSet<>(shownAchievements);
+        boolean hasNewAchievements = false;
+
+        Log.d("Achievements", "Checking " + achievements.size() + " achievements");
+        Log.d("Achievements", "Already shown: " + shownAchievements.size());
+
+        for (Achievement achievement : achievements) {
+            Log.d("Achievements", "Checking achievement ID: " + achievement.id +
+                    ", already shown: " + shownAchievements.contains(achievement.id));
+
+            if (!shownAchievements.contains(achievement.id)) {
+                Log.d("Achievements", "New achievement found: " + achievement.id);
+                showSimpleAchievementDialog(achievement);
+                shownAchievements.add(achievement.id);
+                hasNewAchievements = true;
+            }
+        }
+
+        if (hasNewAchievements) {
+            saveShownAchievements();
+            Log.d("Achievements", "Saved " + shownAchievements.size() + " shown achievements");
+        }
+        if (achievementAdapter != null) {
+            achievementAdapter.updateData(achievements);
+        }
+    }
+
+    private void showSimpleAchievementDialog(Achievement achievement) {
+        runOnUiThread(() -> {
+            if (!shownAchievements.contains(achievement.id)) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle("🎉 Новое достижение!");
+                builder.setMessage("Вы получили: \"" + achievement.achievementType + "\"\n\n" +
+                        "Дата получения: " + formatDate(achievement.unlockedAt));
+
+                builder.setPositiveButton("Отлично!", (dialog, which) -> {
+                    dialog.dismiss();
+                });
+
+                builder.setNegativeButton("Закрыть", (dialog, which) -> {
+                    dialog.dismiss();
+                });
+
+                builder.setCancelable(false);
+
+                AlertDialog dialog = builder.create();
+                dialog.show();
+
+                Log.d("Achievements", "Showing dialog for achievement: " + achievement.id);
+            } else {
+                Log.d("Achievements", "Achievement " + achievement.id + " already shown");
+            }
+        });
+    }public void checkAchievementsAfterTest() {
+        if (currentUserId != 0) {
+            Log.d("Achievements", "Checking achievements after test");
+            new GetUserAchievements().execute();
+        }
+    }
+
+    private String formatDate(String dateStr) {
+        if (dateStr == null || dateStr.isEmpty()) return "Только что";
+        try {
+            SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+            SimpleDateFormat outputFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm");
+            Date date = inputFormat.parse(dateStr);
+            return outputFormat.format(date);
+        } catch (Exception e) {
+            return dateStr;
+        }
     }
 
     private void initializeTriangleAnimations() {
@@ -131,8 +249,41 @@ public class MainActivity extends AppCompatActivity {
         if (animationsStarted) {
             startTriangleAnimations();
         }
+
+        checkForTestCompletion();
+        Intent intent = getIntent();
+        if (intent != null && intent.getBooleanExtra("CHECK_ACHIEVEMENTS", false)) {
+            Log.d("Achievements", "Intent flag received, checking achievements");
+            SharedPreferences prefs = getSharedPreferences("TestPrefs", MODE_PRIVATE);
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putBoolean("check_achievements_after_test", false);
+            editor.apply();
+
+            if (currentUserId != 0) {
+                Log.d("Achievements", "Executing achievements check immediately");
+                new GetUserAchievements().execute();
+            }
+
+            intent.removeExtra("CHECK_ACHIEVEMENTS");
+        }
     }
 
+    private void checkForTestCompletion() {
+        SharedPreferences prefs = getSharedPreferences("TestPrefs", MODE_PRIVATE);
+        boolean shouldCheck = prefs.getBoolean("check_achievements_after_test", false);
+        long lastTestTime = prefs.getLong("last_test_time", 0);
+        long currentTime = System.currentTimeMillis();
+
+        if (shouldCheck && currentTime - lastTestTime < 5 * 60 * 1000) {
+            if (currentUserId != 0) {
+                Log.d("Achievements", "Checking achievements from SharedPreferences flag");
+                SharedPreferences.Editor editor = prefs.edit();
+                editor.putBoolean("check_achievements_after_test", false);
+                editor.apply();
+                new GetUserAchievements().execute();
+            }
+        }
+    }
     @Override
     protected void onPause() {
         super.onPause();
@@ -144,7 +295,6 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
         stopTriangleAnimations();
     }
-
     private void setupPasswordToggle() {
         TextInputLayout passwordLayoutAuth = findViewById(R.id.textInputLayoutPasswordAuth);
         TextInputEditText passwordEditTextAuth = findViewById(R.id.editTextTextPassword);
@@ -554,6 +704,10 @@ public class MainActivity extends AppCompatActivity {
                     stopTriangleAnimations();
                     initializeTopics();
                     new GetTopic().execute();
+
+                    if (currentUserId != 0) {
+                        new GetUserAchievements().execute();
+                    }
                 });
             }
         }
@@ -593,8 +747,134 @@ public class MainActivity extends AppCompatActivity {
         Toast.makeText(this, "Загружены демо-данные", Toast.LENGTH_SHORT).show();
     }
 
-    public void onAchivment (View view){
+    public void onAchivment(View view) {
         setContentView(R.layout.victory_main);
+        stopTriangleAnimations();
+        initializeAchievements();
+
+        if (currentUserId != 0) {
+            Log.d("onAchivment", "Loading achievements for userId: " + currentUserId);
+            new GetUserAchievements().execute();
+        } else {
+            Log.e("onAchivment", "User not authorized, currentUserId: " + currentUserId);
+            Toast.makeText(this, "Пользователь не авторизован", Toast.LENGTH_SHORT).show();
+
+        }
     }
+
+
+
+
+    class GetUserAchievements extends AsyncTask<Void, Void, ArrayList<Achievement>> {
+        private Connection.Response response;
+
+        @Override
+        protected ArrayList<Achievement> doInBackground(Void... voids) {
+            ArrayList<Achievement> achievements = new ArrayList<>();
+
+            if (currentUserId == 0) {
+                Log.e("GetUserAchievements", "currentUserId is 0");
+                return achievements;
+            }
+
+            try {
+                String url = "http://10.0.2.2:5184/api/Achievements/GetUserAchievements?userId=" + currentUserId;
+                Log.d("GetUserAchievements", "Loading from URL: " + url);
+
+                response = Jsoup.connect(url)
+                        .header("Authorization", "Bearer " + authToken)
+                        .ignoreContentType(true)
+                        .method(Connection.Method.GET)
+                        .timeout(10000)
+                        .execute();
+
+                Log.d("GetUserAchievements", "Response status: " + response.statusCode());
+                Log.d("GetUserAchievements", "Response body: " + response.body());
+
+                if (response.statusCode() == 200) {
+                    String jsonResponse = response.body();
+                    Gson gson = new Gson();
+                    AchievementResponse achievementResponse = gson.fromJson(jsonResponse, AchievementResponse.class);
+
+                    if (achievementResponse != null && achievementResponse.success && achievementResponse.data != null) {
+                        Log.d("GetUserAchievements", "Success! Count: " + achievementResponse.data.size());
+                        achievements.addAll(achievementResponse.data);
+                    } else {
+                        Log.e("GetUserAchievements", "Response parsing failed or data is null");
+                    }
+                } else {
+                    Log.e("GetUserAchievements", "HTTP error: " + response.statusCode());
+                }
+            } catch (IOException e) {
+                Log.e("GetUserAchievements", "IOException: " + e.getMessage());
+                e.printStackTrace();
+            } catch (Exception e) {
+                Log.e("GetUserAchievements", "Exception: " + e.getMessage());
+                e.printStackTrace();
+            }
+            return achievements;
+        }
+
+        @Override
+        protected void onPostExecute(ArrayList<Achievement> result) {
+            super.onPostExecute(result);
+
+            Log.d("GetUserAchievements", "onPostExecute, result size: " + (result != null ? result.size() : "null"));
+
+            if (result != null && !result.isEmpty()) {
+                checkAndShowNewAchievementsSimple(result);
+
+                if (achievementAdapter != null) {
+                    achievementAdapter.updateData(result);
+                    Toast.makeText(MainActivity.this, "Загружено достижений: " + result.size(), Toast.LENGTH_SHORT).show();
+                } else {
+                    int newAchievementsCount = 0;
+                    for (Achievement achievement : result) {
+                        if (!shownAchievements.contains(achievement.id)) {
+                            newAchievementsCount++;
+                        }
+                    }
+                    if (newAchievementsCount > 0) {
+                        Toast.makeText(MainActivity.this,
+                                "Получено новых достижений: " + newAchievementsCount,
+                                Toast.LENGTH_SHORT).show();
+                    }
+                }
+            } else {
+                Log.d("GetUserAchievements", "No achievements found or empty list");
+            }
+        }
+    }
+    private void initializeAchievements() {
+        RecyclerView achievementsRecyclerView = findViewById(R.id.listresult);
+
+        if (achievementsRecyclerView == null) {
+            Log.e("initializeAchievements", "RecyclerView not found! Check layout ID");
+            return;
+        }
+        ArrayList<Achievement> achievementsList = new ArrayList<>();
+        achievementAdapter = new AchievementAdapter(this, achievementsList);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        achievementsRecyclerView.setLayoutManager(layoutManager);
+        achievementsRecyclerView.setAdapter(achievementAdapter);
+
+        Log.d("initializeAchievements", "Achievements RecyclerView initialized");
+    }
+    private void showDemoAchievements() {
+        ArrayList<Achievement> demoAchievements = new ArrayList<>();
+        demoAchievements.add(new Achievement(1, 0, "Первые 3 теста", "2024-01-01T12:00:00"));
+        demoAchievements.add(new Achievement(2, 0, "Исследователь", "2024-01-02T14:30:00"));
+        demoAchievements.add(new Achievement(3, 0, "3 теста за один день", "2024-01-03T16:45:00"));
+
+        if (achievementAdapter != null) {
+            achievementAdapter.updateData(demoAchievements);
+        }
+    }
+
+
+
+
+
+
 
 }
