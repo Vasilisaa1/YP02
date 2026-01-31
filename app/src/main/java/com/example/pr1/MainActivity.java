@@ -6,6 +6,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.text.method.HideReturnsTransformationMethod;
 import android.text.method.PasswordTransformationMethod;
 import android.view.View;
@@ -59,11 +61,18 @@ public class MainActivity extends AppCompatActivity {
     public UsersModel ss;
     private boolean animationsStarted = false;
 
+    // Переменные для отслеживания состояния валидации
+    private boolean isEmailValid = false;
+    private boolean isNameValid = false;
+    private boolean isPasswordValid = false;
+    private boolean isConfirmPasswordValid = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.auth);
         setupPasswordToggle();
+        setupTextWatchersForAuth();
     }
 
     private void initializeTriangleAnimations() {
@@ -178,6 +187,214 @@ public class MainActivity extends AppCompatActivity {
         passwordEditText.setSelection(passwordEditText.getText().length());
     }
 
+    // Методы для настройки TextWatcher для авторизации
+    private void setupTextWatchersForAuth() {
+        EditText etEmail = findViewById(R.id.editTextTextEmailAddress);
+        EditText etPassword = findViewById(R.id.editTextTextPassword);
+
+        if (etEmail != null) {
+            etEmail.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+                @Override
+                public void afterTextChanged(Editable s) {
+                    validateEmailField(s.toString());
+                }
+            });
+        }
+
+        if (etPassword != null) {
+            etPassword.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+                @Override
+                public void afterTextChanged(Editable s) {
+                    validatePasswordFieldForAuth(s.toString());
+                }
+            });
+        }
+    }
+
+    // Методы для настройки TextWatcher для регистрации
+    private void setupTextWatchersForRegistration() {
+        EditText tv_email = findViewById(R.id.editTextEmail);
+        EditText tv_name = findViewById(R.id.editTextName);
+        EditText tv_password = findViewById(R.id.editTextPassword);
+        EditText tv_password2 = findViewById(R.id.editTextConfirmPassword);
+
+        // Валидация email
+        if (tv_email != null) {
+            tv_email.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+                @Override
+                public void afterTextChanged(Editable s) {
+                    isEmailValid = validateEmailField(s.toString());
+                    updateRegisterButtonState();
+                }
+            });
+        }
+
+        // Валидация имени
+        if (tv_name != null) {
+            tv_name.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+                @Override
+                public void afterTextChanged(Editable s) {
+                    isNameValid = validateNameField(s.toString());
+                    updateRegisterButtonState();
+                }
+            });
+        }
+
+        // Валидация пароля
+        if (tv_password != null) {
+            tv_password.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+                @Override
+                public void afterTextChanged(Editable s) {
+                    isPasswordValid = validatePasswordField(s.toString());
+                    validateConfirmPasswordField(tv_password2.getText().toString(), s.toString());
+                    updateRegisterButtonState();
+                }
+            });
+        }
+
+        // Валидация подтверждения пароля
+        if (tv_password2 != null) {
+            tv_password2.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+                @Override
+                public void afterTextChanged(Editable s) {
+                    isConfirmPasswordValid = validateConfirmPasswordField(s.toString(),
+                            tv_password.getText().toString());
+                    updateRegisterButtonState();
+                }
+            });
+        }
+    }
+
+    // Методы валидации полей
+    private boolean validateEmailField(String email) {
+        TextInputLayout emailLayout = null;
+
+        if (findViewById(R.id.editTextEmail) != null) {
+            emailLayout = (TextInputLayout) findViewById(R.id.editTextEmail).getParent().getParent();
+        } else if (findViewById(R.id.editTextTextEmailAddress) != null) {
+            emailLayout = (TextInputLayout) findViewById(R.id.editTextTextEmailAddress).getParent().getParent();
+        }
+
+        if (emailLayout == null) return false;
+
+        if (email.isEmpty()) {
+            emailLayout.setError("Введите email");
+            return false;
+        } else if (!Utils.isValidEmail(email)) {
+            emailLayout.setError("Введите корректный email");
+            return false;
+        } else {
+            emailLayout.setError(null);
+            return true;
+        }
+    }
+
+    private boolean validateNameField(String name) {
+        TextInputLayout nameLayout = (TextInputLayout) findViewById(R.id.editTextName).getParent().getParent();
+
+        if (name.isEmpty()) {
+            nameLayout.setError("Введите имя");
+            return false;
+        } else if (!Utils.isValidName(name)) {
+            nameLayout.setError(Utils.getNameErrorMessage());
+            return false;
+        } else {
+            nameLayout.setError(null);
+            return true;
+        }
+    }
+
+    private boolean validatePasswordField(String password) {
+        TextInputLayout passwordLayout = (TextInputLayout) findViewById(R.id.editTextPassword).getParent().getParent();
+
+        if (password.isEmpty()) {
+            passwordLayout.setError("Введите пароль");
+            return false;
+        } else if (!Utils.isPasswordLengthValid(password)) {
+            passwordLayout.setError("Пароль должен содержать минимум 8 символов");
+            return false;
+        } else if (!Utils.isValidPassword(password)) {
+            passwordLayout.setError(Utils.getPasswordErrorMessage());
+            return false;
+        } else {
+            passwordLayout.setError(null);
+            return true;
+        }
+    }
+
+    private boolean validatePasswordFieldForAuth(String password) {
+        TextInputLayout passwordLayout = (TextInputLayout) findViewById(R.id.editTextTextPassword).getParent().getParent();
+
+        if (password.isEmpty()) {
+            passwordLayout.setError("Введите пароль");
+            return false;
+        } else {
+            passwordLayout.setError(null);
+            return true;
+        }
+    }
+
+    private boolean validateConfirmPasswordField(String confirmPassword, String password) {
+        TextInputLayout confirmPasswordLayout = (TextInputLayout) findViewById(R.id.editTextConfirmPassword).getParent().getParent();
+
+        if (confirmPassword.isEmpty()) {
+            confirmPasswordLayout.setError("Подтвердите пароль");
+            return false;
+        } else if (!Utils.doPasswordsMatch(password, confirmPassword)) {
+            confirmPasswordLayout.setError("Пароли не совпадают");
+            return false;
+        } else {
+            confirmPasswordLayout.setError(null);
+            return true;
+        }
+    }
+
+    // Обновление состояния кнопки регистрации
+    private void updateRegisterButtonState() {
+        View registerButton = findViewById(R.id.registerButton);
+        if (registerButton != null) {
+            boolean isFormValid = isEmailValid && isNameValid && isPasswordValid && isConfirmPasswordValid;
+            registerButton.setEnabled(isFormValid);
+            registerButton.setAlpha(isFormValid ? 1.0f : 0.5f);
+        }
+    }
+
     private void initializeResults() {
         resultsRecyclerView = findViewById(R.id.listresult);
         resultsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -224,6 +441,15 @@ public class MainActivity extends AppCompatActivity {
         Login = etEmail.getText().toString();
         Password = etPassword.getText().toString();
 
+        // Валидация полей авторизации
+        boolean isEmailValid = validateEmailField(Login);
+        boolean isPasswordValid = validatePasswordFieldForAuth(Password);
+
+        if (!isEmailValid || !isPasswordValid) {
+            Toast.makeText(this, "Исправьте ошибки в форме", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         if (Login.isEmpty() || Password.isEmpty()) {
             Toast.makeText(this, "Заполните все поля", Toast.LENGTH_SHORT).show();
             return;
@@ -244,6 +470,17 @@ public class MainActivity extends AppCompatActivity {
         String password = tv_password.getText().toString();
         String confirmPassword = tv_password2.getText().toString();
 
+        // Финальная проверка перед отправкой
+        boolean isEmailValid = validateEmailField(email);
+        boolean isNameValid = validateNameField(name);
+        boolean isPasswordValid = validatePasswordField(password);
+        boolean isConfirmPasswordValid = validateConfirmPasswordField(confirmPassword, password);
+
+        if (!isEmailValid || !isNameValid || !isPasswordValid || !isConfirmPasswordValid) {
+            Toast.makeText(this, "Исправьте ошибки в форме", Toast.LENGTH_LONG).show();
+            return;
+        }
+
         if (email.isEmpty() || name.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
             Toast.makeText(this, "Заполните все поля", Toast.LENGTH_SHORT).show();
             return;
@@ -251,6 +488,12 @@ public class MainActivity extends AppCompatActivity {
 
         if (!password.equals(confirmPassword)) {
             Toast.makeText(this, "Пароли не совпадают", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Проверка сложности пароля
+        if (!Utils.isValidPassword(password)) {
+            Toast.makeText(this, Utils.getPasswordErrorMessage(), Toast.LENGTH_LONG).show();
             return;
         }
 
@@ -263,12 +506,19 @@ public class MainActivity extends AppCompatActivity {
 
     public void ReigesterPage(View view) {
         setContentView(R.layout.registr);
+        setupPasswordToggle();
+        setupTextWatchersForRegistration();
+        resetValidationFlags();
+        updateRegisterButtonState();
     }
 
     public void goToLoginPage(View view) {
         setContentView(R.layout.auth);
         setupPasswordToggle();
+        setupTextWatchersForAuth();
+        resetValidationFlags();
     }
+
     public void OnProfil(View view) {
         setContentView(R.layout.profile_activity);
         stopTriangleAnimations();
@@ -285,6 +535,14 @@ public class MainActivity extends AppCompatActivity {
         stopTriangleAnimations();
         initializeTopics();
         new GetTopic().execute();
+    }
+
+    // Сброс флагов валидации
+    private void resetValidationFlags() {
+        isEmailValid = false;
+        isNameValid = false;
+        isPasswordValid = false;
+        isConfirmPasswordValid = false;
     }
 
     class GetUserResults extends AsyncTask<Void, Void, ArrayList<ResultsModel>> {
@@ -409,10 +667,16 @@ public class MainActivity extends AppCompatActivity {
                 runOnUiThread(() -> {
                     setContentView(R.layout.auth);
                     stopTriangleAnimations();
-                    Toast.makeText(MainActivity.this, "Успешно!", Toast.LENGTH_SHORT).show();
+                    setupTextWatchersForAuth();
+                    resetValidationFlags();
+                    Toast.makeText(MainActivity.this, "Регистрация успешна!", Toast.LENGTH_SHORT).show();
                 });
             } else {
-                Toast.makeText(MainActivity.this, "Ошибка: " + response.statusCode(), Toast.LENGTH_SHORT).show();
+                if (response.statusCode() == 400) {
+                    Toast.makeText(MainActivity.this, "Пользователь с таким email уже существует", Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(MainActivity.this, "Ошибка регистрации: " + response.statusCode(), Toast.LENGTH_SHORT).show();
+                }
             }
         }
     }
@@ -508,8 +772,10 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+
     class GetUser extends AsyncTask<Void, Void, Void> {
         Connection.Response response;
+
         @Override
         protected Void doInBackground(Void... voids) {
             try {
@@ -545,7 +811,11 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(MainActivity.this, "Ошибка соединения", Toast.LENGTH_SHORT).show();
                 return;
             } else if (response.statusCode() != 200) {
-                Toast.makeText(MainActivity.this, "Ошибка авторизации", Toast.LENGTH_SHORT).show();
+                if (response.statusCode() == 401) {
+                    Toast.makeText(MainActivity.this, "Неверный email или пароль", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(MainActivity.this, "Ошибка авторизации: " + response.statusCode(), Toast.LENGTH_SHORT).show();
+                }
                 return;
             } else {
                 runOnUiThread(() -> {
@@ -557,6 +827,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+
     private void updateProfileUI(UsersModel user) {
         TextView profileName = findViewById(R.id.profile_name);
         TextView profileEmail = findViewById(R.id.profile_email);

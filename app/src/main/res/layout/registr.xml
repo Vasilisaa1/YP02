@@ -133,7 +133,7 @@
                     app:hintTextColor="#FFFFFF"
                       app:startIconTint="#FFFFFF">
 
-                    <EditText
+                    <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/editTextEmail"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -159,7 +159,7 @@
 
                     app:startIconTint="#878787">
 
-                    <EditText
+                    <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/editTextName"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -187,7 +187,7 @@
                     app:hintTextColor="#878787"
                     app:startIconTint="#878787">
 
-                    <EditText
+                    <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/editTextPassword"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -215,7 +215,7 @@
                     app:hintTextColor="#878787"
                       app:startIconTint="#878787">
 
-                    <EditText
+                    <com.google.android.material.textfield.TextInputEditText
 
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
