@@ -243,6 +243,14 @@ public class MainActivity extends AppCompatActivity {
         animationsStarted = false;
     }
 
+    public void vopros(View view){
+        setContentView(R.layout.what_is_c);
+    }
+    public void onActivity(View view){
+
+        new GetUser().execute();
+    }
+
     @Override
     protected void onResume() {
         super.onResume();

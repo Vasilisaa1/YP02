@@ -7,7 +7,24 @@
     android:layout_height="match_parent"
     android:background="@drawable/gradient_background">
 
+    <androidx.cardview.widget.CardView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="0dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:onClick="vopros"
+            android:src="@drawable/vopros"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.cardview.widget.CardView>
     <!-- Фоновый паттерн -->
+    <!-- Декоративные элементы -->
     <ImageView
         android:id="@+id/bgAnimation"
         android:layout_width="match_parent"
@@ -17,10 +34,11 @@
         android:src="@drawable/code_pattern"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0" />
 
-    <!-- Декоративные элементы -->
     <ImageView
         android:layout_width="80dp"
         android:layout_height="80dp"
@@ -82,7 +100,7 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="26dp"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp"
         android:clipToPadding="false"
