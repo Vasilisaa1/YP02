@@ -868,6 +868,7 @@ public class MainActivity extends AppCompatActivity {
 
         Log.d("initializeAchievements", "Achievements RecyclerView initialized");
     }
+    //
     private void showDemoAchievements() {
         ArrayList<Achievement> demoAchievements = new ArrayList<>();
         demoAchievements.add(new Achievement(1, 0, "Первые 3 теста", "2024-01-01T12:00:00"));
